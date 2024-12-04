@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+}
+.header{
+  background-color: rgb(7, 185, 255);
+  padding: 1rem;
+}
+.header h2 {
+  margin: 0;
+}
+.btn-group {
+  float: right;
+  margin-top: 1.5rem;
+}
+
+.btn-group button {
+    background-color: rgb(7, 185, 255); /* firebrick background */
+    color: rgb(0, 0, 0); /* White text */
+    padding: 10px 24px; /* Some padding */
+    cursor: pointer; /* Pointer/hand icon */
+    float: left; /* Float the buttons side by side */
+    font-weight: bold;
+  }
+  
+  .btn-group button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+  }
+  
+  /* Clear floats (clearfix hack) */
+  .btn-group:after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+  
+  /* Add a background color on hover */
+  .btn-group button:hover {
+    background-color:rgb(247, 247, 247);
+  }
+  body{
+background-color: coral;
+
+background-repeat: no-repeat;
+background-size: cover;
+  }
+
+h1 a{
+  color: yellow;
+}
+
+h2 p{h
+    font-size: 24pt;
+    color:yellow;
+}
+
+h2 a{
+  color:rgb(67, 238, 24)
+}
+
+.info{
+  margin: 10rem auto;
+  text-align: center;
+  font-size: 60px;
+}
+
+h3 p{
+  font-size: 5pt;
+  color:yellow;
+}
