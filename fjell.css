@@ -35,7 +35,7 @@ body {
   
   /* Add a background color on hover */
   .btn-group button:hover {
-    background-color:rgb(247, 247, 247);
+    background-color: #7753C0;
   }
   body{
 background-color: coral;
