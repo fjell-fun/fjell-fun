@@ -51,7 +51,7 @@ h1 a{
 
 h2 p{h
     font-size: 24pt;
-    color: white;
+    color: #474745;
 }
 
 h2 a{
@@ -66,5 +66,5 @@ h2 a{
 
 h3 p{
   font-size: 5pt;
-  color: #474745;
+  color: white;
 }
