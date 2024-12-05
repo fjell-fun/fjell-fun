@@ -14,7 +14,7 @@ body {
 }
 
 .btn-group button {
-    background-color: rgb(7, 185, 255); /* firebrick background */
+    background-color: #855CD6; /* purple background */
     color: rgb(0, 0, 0); /* White text */
     padding: 10px 24px; /* Some padding */
     cursor: pointer; /* Pointer/hand icon */
