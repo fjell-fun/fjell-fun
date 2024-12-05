@@ -20,6 +20,7 @@ body {
     cursor: pointer; /* Pointer/hand icon */
     float: left; /* Float the buttons side by side */
     font-weight: bold;
+    border-color: white;
   }
   
   .btn-group button:not(:last-child) {
