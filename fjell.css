@@ -38,7 +38,7 @@ body {
     background-color: #7753C0;
   }
   body{
-background-color: coral;
+background-color: white;
 
 background-repeat: no-repeat;
 background-size: cover;
@@ -65,5 +65,5 @@ h2 a{
 
 h3 p{
   font-size: 5pt;
-  color: white;
+  color: #474745;
 }
