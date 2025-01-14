@@ -3,127 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Minecraft-like Terrain - Three.js</title>
+    <title>3D Minecraft-like Terrain</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
     </style>
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/perlin-noise"></script>
+    <script>
+        // Scene setup
+        let scene, camera, renderer, controls;
+        let playerSpeed = 0.1;
+        let keys = {};
 
-<script>
-    // Basic setup for Three.js
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+        // Create the scene, camera, and renderer
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-    // Add textures for blocks (e.g., grass, dirt)
-    const textureLoader = new THREE.TextureLoader();
-    const grassTexture = textureLoader.load('https://threejs.org/examples/textures/grasslight-big.jpg');
-    const dirtTexture = textureLoader.load('https://threejs.org/examples/textures/brick_diffuse.jpg');
-    const blockTextures = [grassTexture, dirtTexture];
+        // Orbit Controls for smooth camera movement
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-    // Smooth terrain generation using Perlin noise
-    const terrainWidth = 100;
-    const terrainHeight = 100;
-    const blockSize = 1;
+        // Set up terrain size
+        const terrainSize = 50;
+        const terrain = new THREE.Group();
 
-    function generateTerrain() {
-        const terrain = [];
-        const noise = new PerlinNoise();
+        // Function to generate terrain with random height
+        function generateTerrain() {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
-        for (let x = 0; x < terrainWidth; x++) {
-            for (let z = 0; z < terrainHeight; z++) {
-                const height = Math.floor(noise.get(x / 10, z / 10) * 5);
-                const blockType = height > 3 ? 0 : 1; // Grass for higher ground, dirt for lower
-
-                const geometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
-                const material = new THREE.MeshBasicMaterial({
-                    map: blockTextures[blockType],
-                    side: THREE.DoubleSide
-                });
-
-                const block = new THREE.Mesh(geometry, material);
-                block.position.set(x - terrainWidth / 2, height, z - terrainHeight / 2);
-                scene.add(block);
+            for (let x = -terrainSize; x < terrainSize; x++) {
+                for (let z = -terrainSize; z < terrainSize; z++) {
+                    let height = Math.floor(Math.random() * 10);  // Random height for terrain
+                    const cube = new THREE.Mesh(geometry, material);
+                    cube.position.set(x, height / 2, z);
+                    terrain.add(cube);
+                }
             }
+            scene.add(terrain);
         }
-    }
 
-    generateTerrain();
+        generateTerrain();
 
-    // Camera setup for first-person controls
-    camera.position.set(0, 5, 10);
-    camera.rotation.x = 0;
+        // Camera position
+        camera.position.z = 30;
 
-    // Movement variables
-    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-    let velocity = new THREE.Vector3();
-    let direction = new THREE.Vector3();
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
 
-    // Pointer Lock for mouse look
-    document.body.requestPointerLock = document.body.requestPointerLock || document.body.mozRequestPointerLock;
-    document.body.requestPointerLock();
+        // Player movement handler (WASD/Arrow keys)
+        function handleMovement() {
+            let forward = 0;
+            let strafe = 0;
 
-    // Mouse movement to look around
-    let mouseX = 0, mouseY = 0;
-    let pitch = 0, yaw = 0;
-    
-    document.addEventListener('mousemove', (event) => {
-        mouseX = event.movementX;
-        mouseY = event.movementY;
+            if (keys["w"] || keys["ArrowUp"]) forward = 1;
+            if (keys["s"] || keys["ArrowDown"]) forward = -1;
+            if (keys["a"] || keys["ArrowLeft"]) strafe = -1;
+            if (keys["d"] || keys["ArrowRight"]) strafe = 1;
 
-        yaw += mouseX * 0.1;
-        pitch -= mouseY * 0.1;
-        pitch = Math.max(-90, Math.min(90, pitch)); // Limit pitch to avoid flipping
+            // Move the camera position based on the key press
+            camera.position.x += strafe * playerSpeed;
+            camera.position.z += forward * playerSpeed;
+        }
 
-        camera.rotation.set(pitch * Math.PI / 180, yaw * Math.PI / 180, 0);
-    });
+        // Event listeners for key presses
+        window.addEventListener('keydown', (event) => {
+            keys[event.key.toLowerCase()] = true;
+        });
 
-    // Movement control
-    window.addEventListener('keydown', (event) => {
-        if (event.key === 'w') moveForward = true;
-        if (event.key === 's') moveBackward = true;
-        if (event.key === 'a') moveLeft = true;
-        if (event.key === 'd') moveRight = true;
-    });
+        window.addEventListener('keyup', (event) => {
+            keys[event.key.toLowerCase()] = false;
+        });
 
-    window.addEventListener('keyup', (event) => {
-        if (event.key === 'w') moveForward = false;
-        if (event.key === 's') moveBackward = false;
-        if (event.key === 'a') moveLeft = false;
-        if (event.key === 'd') moveRight = false;
-    });
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
 
-    // Render loop with movement logic
-    function animate() {
-        requestAnimationFrame(animate);
+            // Handle player movement
+            handleMovement();
 
-        // Move camera smoothly
-        velocity.x = 0;
-        velocity.z = 0;
+            // Update the camera and controls
+            controls.update();
 
-        if (moveForward) velocity.z -= 0.1;
-        if (moveBackward) velocity.z += 0.1;
-        if (moveLeft) velocity.x -= 0.1;
-        if (moveRight) velocity.x += 0.1;
+            // Render the scene
+            renderer.render(scene, camera);
+        }
 
-        // Normalize direction and move camera
-        direction.z = -Math.sin(camera.rotation.y);
-        direction.x = Math.cos(camera.rotation.y);
-        camera.position.x += velocity.x * direction.x;
-        camera.position.z += velocity.z * direction.z;
-
-        renderer.render(scene, camera);
-    }
-
-    animate();
-</script>
-
+        // Start the animation loop
+        animate();
+    </script>
 </body>
 </html>
