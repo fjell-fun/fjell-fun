@@ -46,7 +46,7 @@ window.addEventListener('keyup', (e) => {
   keys[e.key] = false;
 });
 
-// Game loop
+// Update player position
 function update() {
   // Player movement
   if (keys['ArrowLeft'] || keys['a']) player.position.x -= TILE_SIZE * 0.1;
@@ -57,6 +57,12 @@ function update() {
   // Prevent player from going out of bounds
   player.position.x = Math.max(0, Math.min(player.position.x, (WORLD_WIDTH - 1) * TILE_SIZE));
   player.position.z = Math.max(0, Math.min(player.position.z, (WORLD_DEPTH - 1) * TILE_SIZE));
+  
+  // Camera movement (following the player)
+  camera.position.x = player.position.x + 15;
+  camera.position.z = player.position.z + 15;
+  camera.position.y = 30;
+  camera.lookAt(player.position);
 }
 
 function animate() {
