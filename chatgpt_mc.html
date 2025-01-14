@@ -1,12 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minecraft by ChatGPT</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft by ChatGPT</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
 </head>
 <body>
-  <script src="chatgpt_mc.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Basic setup for the scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create a basic block (Voxel)
+    const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const blockMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    
+    // Function to create terrain (grid of blocks)
+    const gridSize = 10;
+    for (let x = 0; x < gridSize; x++) {
+        for (let z = 0; z < gridSize; z++) {
+            const terrainBlock = new THREE.Mesh(blockGeometry, blockMaterial);
+            terrainBlock.position.set(x, 0, z);
+            scene.add(terrainBlock);
+        }
+    }
+
+    // Camera setup
+    camera.position.z = 5;
+
+    // Basic movement for camera
+    const speed = 0.1;
+    function moveCamera(event) {
+        if (event.key === 'w') camera.position.z -= speed;
+        if (event.key === 's') camera.position.z += speed;
+        if (event.key === 'a') camera.position.x -= speed;
+        if (event.key === 'd') camera.position.x += speed;
+    }
+
+    // Event listener for keyboard input
+    window.addEventListener('keydown', moveCamera);
+
+    // Render loop
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+
 </body>
 </html>
