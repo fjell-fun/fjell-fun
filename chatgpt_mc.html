@@ -3,104 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft by ChatGPT</title>
+    <title>3D Minecraft-like Terrain</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
     </style>
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
 
     <script>
         // Scene setup
-        let scene, camera, renderer, controls;
-        let playerSpeed = 0.1;
-        let keys = {};
-
-        // Create the scene, camera, and renderer
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer();
+        let scene = new THREE.Scene();
+        let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        let renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
         // Orbit Controls for smooth camera movement
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-        // Set up terrain size
-        const terrainSize = 50;
-        const terrain = new THREE.Group();
-
-        // Function to generate terrain with random height
-        function generateTerrain() {
-            const geometry = new THREE.BoxGeometry(1, 1, 1);
-            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-            for (let x = -terrainSize; x < terrainSize; x++) {
-                for (let z = -terrainSize; z < terrainSize; z++) {
-                    let height = Math.floor(Math.random() * 10);  // Random height for terrain
-                    const cube = new THREE.Mesh(geometry, material);
-                    cube.position.set(x, height / 2, z);
-                    terrain.add(cube);
-                }
-            }
-            scene.add(terrain);
-        }
-
-        generateTerrain();
+        // Create a basic cube to test rendering
+        let geometry = new THREE.BoxGeometry();
+        let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        let cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
 
         // Camera position
-        camera.position.z = 30;
+        camera.position.z = 5;
 
-        // Handle window resizing
+        // Handle resizing
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Player movement handler (WASD/Arrow keys)
-        function handleMovement() {
-            let forward = 0;
-            let strafe = 0;
-
-            if (keys["w"] || keys["ArrowUp"]) forward = 1;
-            if (keys["s"] || keys["ArrowDown"]) forward = -1;
-            if (keys["a"] || keys["ArrowLeft"]) strafe = -1;
-            if (keys["d"] || keys["ArrowRight"]) strafe = 1;
-
-            // Move the camera position based on the key press
-            camera.position.x += strafe * playerSpeed;
-            camera.position.z += forward * playerSpeed;
-        }
-
-        // Event listeners for key presses
-        window.addEventListener('keydown', (event) => {
-            keys[event.key.toLowerCase()] = true;
-        });
-
-        window.addEventListener('keyup', (event) => {
-            keys[event.key.toLowerCase()] = false;
-        });
-
         // Animation loop
         function animate() {
             requestAnimationFrame(animate);
-
-            // Handle player movement
-            handleMovement();
-
-            // Update the camera and controls
-            controls.update();
-
-            // Render the scene
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            controls.update(); // Update the controls
             renderer.render(scene, camera);
         }
 
-        // Start the animation loop
+        // Start the animation
         animate();
     </script>
 </body>
