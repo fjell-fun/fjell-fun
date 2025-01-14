@@ -3,55 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft by ChatGPT</title>
+    <title>3D Minecraft-like Terrain - Three.js</title>
     <style>
-        body { margin: 0; }
+        body { margin: 0; overflow: hidden; }
         canvas { display: block; }
     </style>
 </head>
 <body>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/perlin-noise"></script>
+
 <script>
-    // Basic setup for the scene
+    // Basic setup for Three.js
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Create a basic block (Voxel)
-    const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
-    const blockMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    
-    // Function to create terrain (grid of blocks)
-    const gridSize = 10;
-    for (let x = 0; x < gridSize; x++) {
-        for (let z = 0; z < gridSize; z++) {
-            const terrainBlock = new THREE.Mesh(blockGeometry, blockMaterial);
-            terrainBlock.position.set(x, 0, z);
-            scene.add(terrainBlock);
+    // Add textures for blocks (e.g., grass, dirt)
+    const textureLoader = new THREE.TextureLoader();
+    const grassTexture = textureLoader.load('https://threejs.org/examples/textures/grasslight-big.jpg');
+    const dirtTexture = textureLoader.load('https://threejs.org/examples/textures/brick_diffuse.jpg');
+    const blockTextures = [grassTexture, dirtTexture];
+
+    // Smooth terrain generation using Perlin noise
+    const terrainWidth = 100;
+    const terrainHeight = 100;
+    const blockSize = 1;
+
+    function generateTerrain() {
+        const terrain = [];
+        const noise = new PerlinNoise();
+
+        for (let x = 0; x < terrainWidth; x++) {
+            for (let z = 0; z < terrainHeight; z++) {
+                const height = Math.floor(noise.get(x / 10, z / 10) * 5);
+                const blockType = height > 3 ? 0 : 1; // Grass for higher ground, dirt for lower
+
+                const geometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+                const material = new THREE.MeshBasicMaterial({
+                    map: blockTextures[blockType],
+                    side: THREE.DoubleSide
+                });
+
+                const block = new THREE.Mesh(geometry, material);
+                block.position.set(x - terrainWidth / 2, height, z - terrainHeight / 2);
+                scene.add(block);
+            }
         }
     }
 
-    // Camera setup
-    camera.position.z = 5;
+    generateTerrain();
 
-    // Basic movement for camera
-    const speed = 0.1;
-    function moveCamera(event) {
-        if (event.key === 'w') camera.position.z -= speed;
-        if (event.key === 's') camera.position.z += speed;
-        if (event.key === 'a') camera.position.x -= speed;
-        if (event.key === 'd') camera.position.x += speed;
-    }
+    // Camera setup for first-person controls
+    camera.position.set(0, 5, 10);
+    camera.rotation.x = 0;
 
-    // Event listener for keyboard input
-    window.addEventListener('keydown', moveCamera);
+    // Movement variables
+    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    let velocity = new THREE.Vector3();
+    let direction = new THREE.Vector3();
 
-    // Render loop
+    // Pointer Lock for mouse look
+    document.body.requestPointerLock = document.body.requestPointerLock || document.body.mozRequestPointerLock;
+    document.body.requestPointerLock();
+
+    // Mouse movement to look around
+    let mouseX = 0, mouseY = 0;
+    let pitch = 0, yaw = 0;
+    
+    document.addEventListener('mousemove', (event) => {
+        mouseX = event.movementX;
+        mouseY = event.movementY;
+
+        yaw += mouseX * 0.1;
+        pitch -= mouseY * 0.1;
+        pitch = Math.max(-90, Math.min(90, pitch)); // Limit pitch to avoid flipping
+
+        camera.rotation.set(pitch * Math.PI / 180, yaw * Math.PI / 180, 0);
+    });
+
+    // Movement control
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'w') moveForward = true;
+        if (event.key === 's') moveBackward = true;
+        if (event.key === 'a') moveLeft = true;
+        if (event.key === 'd') moveRight = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+        if (event.key === 'w') moveForward = false;
+        if (event.key === 's') moveBackward = false;
+        if (event.key === 'a') moveLeft = false;
+        if (event.key === 'd') moveRight = false;
+    });
+
+    // Render loop with movement logic
     function animate() {
         requestAnimationFrame(animate);
+
+        // Move camera smoothly
+        velocity.x = 0;
+        velocity.z = 0;
+
+        if (moveForward) velocity.z -= 0.1;
+        if (moveBackward) velocity.z += 0.1;
+        if (moveLeft) velocity.x -= 0.1;
+        if (moveRight) velocity.x += 0.1;
+
+        // Normalize direction and move camera
+        direction.z = -Math.sin(camera.rotation.y);
+        direction.x = Math.cos(camera.rotation.y);
+        camera.position.x += velocity.x * direction.x;
+        camera.position.z += velocity.z * direction.z;
+
         renderer.render(scene, camera);
     }
 
